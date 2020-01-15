@@ -8,34 +8,40 @@ const swagpiConfig = require('./src/swagpi.config.js');
 const loadConfig = require('./src/loadConfig');
 const routes = require('./src/routes');
 const commands = require('./src/commands');
-const middleware = require('./middleware');
+const auth_middleware = require('./auth_middleware');
 const chalk = vorpal.chalk;
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-middleware.call(app);
 
-swagpi(app, {
-  logo: './src/img/logo.png',
-  config: swagpiConfig
-});
+const init = (args) => {
+	try {
+    // Load config
+		const config = loadConfig(args);
+		const ad = new AD(config).cache(true);
 
-const init = args => {
-  try {
-    const config = loadConfig(args);
-    const ad = new AD(config).cache(true);
-    app.listen(config.port || 3000);
-    routes(app, config, ad);
-    vorpal.use(commands, { ad });
+    // Add authentication middleware
+		const authinfo = {};
+    authinfo[config.user] = config.pass;
+    auth_middleware(app, authinfo);
+
+    //Instantiate API
+    swagpi(app, {
+	    logo: './src/img/logo.png',
+	    config: swagpiConfig
+    });
+		app.listen(process.env.PORT || 3000);
+		routes(app, config, ad);
+		vorpal.use(commands, { ad });
     vorpal.log(
       `Addict Active Directory API\nListening on port ${config.port || 3000}`
     );
-  } catch (err) {
-    vorpal.log(err.message);
-    process.exit();
-  }
-};
+	} catch(err) {
+		vorpal.log(err.message);
+		process.exit();
+	}
+}
 
 vorpal
   .command('_start')
