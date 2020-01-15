@@ -1,4 +1,7 @@
 {
+  "url": "ldaps://localhost",
+  "user": "username",
+  "pass": "password",
   "defaults": {
     "userObjectClass": "inetOrgPerson"
   }

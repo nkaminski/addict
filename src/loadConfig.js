@@ -1,4 +1,3 @@
-
 module.exports = (args) => {
 	let config;
 
@@ -20,10 +19,10 @@ module.exports = (args) => {
 	if (!config.user) {
 		missing.push('user');
 	}
-	if (!config.user) {
+	if (!config.pass) {
 		missing.push('pass');
 	}
-	if (!config.user) {
+	if (!config.url) {
 		missing.push('url');
 	}
 
@@ -33,5 +32,3 @@ module.exports = (args) => {
 
 	return config;
 }
-
-
