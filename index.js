@@ -15,33 +15,34 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-const init = (args) => {
-	try {
+const init = args => {
+  try {
     // Load config
-		const config = loadConfig(args);
-		const ad = new AD(config).cache(true);
+    const config = loadConfig(args);
+    const ad = new AD(config).cache(true);
 
     // Add authentication middleware
-		const authinfo = {};
+    const authinfo = {};
     authinfo[config.user] = config.pass;
     auth_middleware(app, authinfo);
 
     //Instantiate API
     swagpi(app, {
-	    logo: './src/img/logo.png',
-	    config: swagpiConfig
+      logo: './src/img/logo.png',
+      config: swagpiConfig
     });
-		app.listen(process.env.PORT || 3000);
-		routes(app, config, ad);
-		vorpal.use(commands, { ad });
+    app.listen(config.port || 3000, config.bindaddr || '0.0.0.0');
+    routes(app, config, ad);
+    vorpal.use(commands, { ad });
     vorpal.log(
-      `Addict Active Directory API\nListening on port ${config.port || 3000}`
+      `Addict Active Directory API\nListening on ${config.bindaddr ||
+        '0.0.0.0'} port ${config.port || 3000}`
     );
-	} catch(err) {
-		vorpal.log(err.message);
-		process.exit();
-	}
-}
+  } catch (err) {
+    vorpal.log(err.message);
+    process.exit();
+  }
+};
 
 vorpal
   .command('_start')
